@@ -9,9 +9,33 @@ data = {
     start_year: 2015,
     end_year: 2021,
     date_of_birth: "August 22, 1995",
-    homes: [],
+    homes: [
+        {
+            start_date: "October 22, 2015",
+            end_date: "15 June, 2016",
+            text: "Paris"
+        },
+        {
+            start_date: "September 1, 2016",
+            end_date: "August 31, 2018",
+            text: "New Haven"
+        }
+    ],
     relationships: [],
-    events: [],
+    events: [
+        {
+            date: "April 6, 2019",
+            text: "got married"
+        },
+        {
+            date: "February 15, 2016",
+            text: "bought a car"
+        },
+        {
+            date: "November 25, 2020",
+            text: "got covid"
+        }
+    ]
 }
 num_years = data.end_year - data.start_year + 1
 
@@ -57,8 +81,23 @@ function drawTimeline(i) {
     }
 }
 
+function dateX(date, leapyear=false) {
+    if(leapyear) {
+        leapdays = 1;
+    } else {
+        leapdays = 0;
+    }
+    monthdays = [31,28+leapdays,31,30,31,30,31,31,30,31,30,31]
+    function add(a,b) { return a+b }
+    dayofyear = monthdays.slice(0,date.getMonth()).reduce(add,0) + date.getDate()
+    x = timeline_x0 + dayofyear/365*timeline_width_px
+    return x
+}
+
 // --------------------------------------------------------
 // draw
+
+// the basics
 for(i = 0; i < num_years; i++) {
 
     year = data.start_year + i
@@ -78,16 +117,9 @@ for(i = 0; i < num_years; i++) {
     ctx.fillText(year, timeline_x0/2, (i+.5)*year_height_px+1)
 
     // age
-    // bit of a mess but it's ACCURATE now
     dob = new Date(data.date_of_birth)
-    leapyear = 0;
-    if(year%4 == 0) {leapyear = 1}
-    monthdays = [31,28+leapyear,31,30,31,30,31,31,30,31,30,31]
-    function add(a,b) {return a+b}
-    dayofyear = monthdays.slice(0,dob.getMonth()).reduce(add,0) + dob.getDate()
-    // dayofyear = (365/12)*dob.getMonth() + dob.getDate() // approximate
+    x = dateX(dob, year%4==0)
     age = year - dob.getFullYear()
-    x = timeline_x0 + dayofyear/365*timeline_width_px
     ctx.font = '15px sans-serif'
     ctx.textBaseline = 'alphabetic'
     ctx.textAlign = 'center'
@@ -96,4 +128,53 @@ for(i = 0; i < num_years; i++) {
     ctx.beginPath()
     ctx.arc(x, (i+.5)*year_height_px, 4, 0, Math.PI * 2)
     ctx.fill()
+}
+
+// events
+for(k = 0; k < data.events.length; k++) {
+    event = data.events[k]
+    date = new Date(event.date)
+    x = dateX(date, year%4==0)
+    yearN = date.getFullYear() - data.start_year
+    ctx.font = '15px sans-serif'
+    ctx.textBaseline = 'alphabetic'
+    ctx.textAlign = 'center'
+    ctx.fillStyle = '#338'
+    ctx.fillText(event.text, x, (yearN+.5)*year_height_px-12)
+    ctx.beginPath()
+    ctx.arc(x, (yearN+.5)*year_height_px, 4, 0, Math.PI * 2)
+    ctx.fill()
+}
+
+// homes
+for(k = 0; k < data.homes.length; k++) {
+    home = data.homes[k]
+    d0 = new Date(home.start_date)
+    d1 = new Date(home.end_date)
+    yr0 = d0.getFullYear()
+    yr1 = d1.getFullYear()
+    yrk = yr0
+    while(yrk <= yr1) {
+        if(yrk == yr0) {
+            x0 = dateX(d0, year%4==0)
+        } else {
+            x0 = timeline_x0
+        }
+        if(yrk == yr1) {
+            x1 = dateX(d1, year%4==0)
+        } else {
+            x1 = timeline_x1
+        }
+        y = (yrk-data.start_year+.5)*year_height_px
+        ctx.fillStyle = ['#6bb','#6c8'][k%2]
+        ctx.fillRect(x0, y+8, x1-x0, 26)
+
+        ctx.font = '13px sans-serif'
+        ctx.textBaseline = 'middle'
+        ctx.textAlign = 'center'
+        ctx.fillStyle = '#333'
+        ctx.fillText(home.text, (x0+x1)/2, y+8+13)
+
+        yrk++
+    }
 }
