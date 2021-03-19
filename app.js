@@ -50,23 +50,46 @@ data = {
 }
 
 // --------------------------------------------------------
+// the styles
+styles = {
+    events_color: "#b4a"
+}
+
+
+
+// --------------------------------------------------------
 // setting up the code box and its events
 
 // put the data in the code box
-code = document.getElementById('code')
-code.value = JSON.stringify(data, null, 4)
+datacode = document.getElementById('datacode')
+datacode.value = JSON.stringify(data, null, 4)
+
+// put the styles in the code box
+stylescode = document.getElementById('stylescode')
+stylescode.value = JSON.stringify(styles, null, 4)
 
 // add an event listener to redraw the lifemap each time
 // the code is changed
-code.addEventListener('input', function() {
+datacode.addEventListener('input', function() {
     clearCanvas()
-    drawLifemap(JSON.parse(code.value))
+    data = JSON.parse(datacode.value)
+    styles = JSON.parse(stylescode.value)
+    drawLifemap(data, styles)
+})
+
+// add an event listener to redraw the lifemap each time
+// the code is changed
+stylescode.addEventListener('input', function() {
+    clearCanvas()
+    data = JSON.parse(datacode.value)
+    styles = JSON.parse(stylescode.value)
+    drawLifemap(data, styles)
 })
 
 
 // --------------------------------------------------------
 // the main draw function
-function drawLifemap(data) {
+function drawLifemap(data, styles) {
 
     // --------------------------------------------------------
     // dimension specification
@@ -170,7 +193,7 @@ function drawLifemap(data) {
         ctx.font = '15px sans-serif'
         ctx.textBaseline = 'alphabetic'
         ctx.textAlign = 'center'
-        ctx.fillStyle = '#b4a'
+        ctx.fillStyle = styles.events_color
         ctx.fillText(event.text, x, (yearN+.5)*year_height_px-12)
         ctx.beginPath()
         ctx.arc(x, (yearN+.5)*year_height_px, 4, 0, Math.PI * 2)
@@ -246,4 +269,4 @@ function drawLifemap(data) {
 }
 
 // let er rip
-drawLifemap(data);
+drawLifemap(data, styles);
