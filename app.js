@@ -44,14 +44,18 @@ data = {
         }
     ]
 }
-num_years = data.end_year - data.start_year + 1
+
+// put the data in the code box
+pre = document.getElementById('code')
+pre.innerText = JSON.stringify(data, null, 4)
 
 // dimension specification
 year_height_px = 110
 canvas_width_px = 800
+num_years = data.end_year - data.start_year + 1
 canvas_height_px = num_years * year_height_px
 timeline_x0 = 75
-timeline_x1 = canvas_width_px - 75
+timeline_x1 = canvas_width_px - 60
 timeline_width_px = timeline_x1 - timeline_x0
 
 // set the dimensions
