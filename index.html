@@ -1,9 +1,30 @@
 <html>
 <head>
     <title>make a life timeline</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Open%20Sans&display=swap" rel="stylesheet">
     <style type="text/css">
         /*canvas { border: 1px solid #ddd; }*/
-        pre {
+        html {
+            font-family: "Open Sans", sans-serif;
+            font-size: .9em;
+        }
+        body {
+            padding: 1em 2em;
+        }
+        canvas {
+            margin: 1em 0;
+        }
+        h3 {
+            margin-bottom: 0;
+        }
+        p {
+            margin-top: .9em;
+            width: 800px;
+        }
+        textarea {
+            width: 800px;
+            height: 500px;
             padding: 14px;
             background-color: #eee;
             border-radius: 6px;
@@ -12,11 +33,16 @@
 </head>
 <body>
 
+    <h3>Lifemapper</h3>
+
     <canvas id="canvas" width="800" height="100">
         <p>Looks like your browser doesn't support the features necessary to run this web app :'(</p>
     </canvas>
 
-    <pre id="code"></pre>
+    <hr>
+    <h3>Your lifemap code</h3>
+    <p>Copy this code and save it somewhere &mdash; it contains all the information necessary to recreate your lifemap. Paste it back in this box in the future in order to edit or add to your lifemap.</p>
+    <textarea id="code" class="observable"></textarea>
 
     <script src="app.js"></script>
 </body>
