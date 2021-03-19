@@ -21,6 +21,13 @@ data = {
             text: "New Haven"
         }
     ],
+    jobs: [
+        {
+            start_date: "March 11, 2016",
+            end_date: "September 28, 2017",
+            text: "bellhop"
+        }
+    ],
     relationships: [],
     events: [
         {
@@ -104,7 +111,7 @@ for(i = 0; i < num_years; i++) {
 
     // background color
     ctx.fillStyle = ['#ffffff','#eeeeee'][i%2] // zebra
-    ctx.fillRect(timeline_x0, i*year_height_px, 800, year_height_px)
+    ctx.fillRect(0, i*year_height_px, 800, year_height_px)
 
     // timeline with tick marks
     drawTimeline(i)
@@ -139,7 +146,7 @@ for(k = 0; k < data.events.length; k++) {
     ctx.font = '15px sans-serif'
     ctx.textBaseline = 'alphabetic'
     ctx.textAlign = 'center'
-    ctx.fillStyle = '#338'
+    ctx.fillStyle = '#b4a'
     ctx.fillText(event.text, x, (yearN+.5)*year_height_px-12)
     ctx.beginPath()
     ctx.arc(x, (yearN+.5)*year_height_px, 4, 0, Math.PI * 2)
@@ -167,13 +174,46 @@ for(k = 0; k < data.homes.length; k++) {
         }
         y = (yrk-data.start_year+.5)*year_height_px
         ctx.fillStyle = ['#6bb','#6c8'][k%2]
-        ctx.fillRect(x0, y+8, x1-x0, 26)
+        ctx.fillRect(x0, y+27, x1-x0, 20)
 
-        ctx.font = '13px sans-serif'
+        ctx.font = '14px sans-serif'
         ctx.textBaseline = 'middle'
         ctx.textAlign = 'center'
         ctx.fillStyle = '#333'
-        ctx.fillText(home.text, (x0+x1)/2, y+8+13)
+        ctx.fillText(home.text, (x0+x1)/2, y+27+11)
+
+        yrk++
+    }
+}
+
+// jobs
+for(k = 0; k < data.jobs.length; k++) {
+    job = data.jobs[k]
+    d0 = new Date(job.start_date)
+    d1 = new Date(job.end_date)
+    yr0 = d0.getFullYear()
+    yr1 = d1.getFullYear()
+    yrk = yr0
+    while(yrk <= yr1) {
+        if(yrk == yr0) {
+            x0 = dateX(d0, year%4==0)
+        } else {
+            x0 = timeline_x0
+        }
+        if(yrk == yr1) {
+            x1 = dateX(d1, year%4==0)
+        } else {
+            x1 = timeline_x1
+        }
+        y = (yrk-data.start_year+.5)*year_height_px
+        ctx.fillStyle = ['#fab', '#fab'][k%2]
+        ctx.fillRect(x0, y+11, x1-x0, 12)
+
+        ctx.font = '14px sans-serif'
+        ctx.textBaseline = 'middle'
+        ctx.textAlign = 'center'
+        ctx.fillStyle = '#333'
+        ctx.fillText(job.text, (x0+x1)/2, y+7+11)
 
         yrk++
     }
