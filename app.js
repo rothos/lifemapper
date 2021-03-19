@@ -32,7 +32,33 @@ data = {
             text: "bellhop"
         }
     ],
-    relationships: [],
+    relationships: [
+        {
+            start_date: "June 12, 2016",
+            end_date: "July 8, 2018",
+            text: "Alex"
+        },
+        {
+            start_date: "December 4, 2017",
+            end_date: "present",
+            text: "Bo"
+        },
+        {
+            start_date: "July 21, 2018",
+            end_date: "September 2, 2019",
+            text: "Cas"
+        },
+        {
+            start_date: "July 21, 2018",
+            end_date: "November 19, 2018",
+            text: "Di"
+        },
+        {
+            start_date: "November 19, 2018",
+            end_date: "April 1, 2019",
+            text: "Ez"
+        }
+    ],
     events: [
         {
             date: "April 6, 2019",
@@ -54,7 +80,6 @@ data = {
 styles = {
     events_color: "#b4a"
 }
-
 
 
 // --------------------------------------------------------
@@ -93,7 +118,7 @@ function drawLifemap(data, styles) {
 
     // --------------------------------------------------------
     // dimension specification
-    year_height_px = 110
+    year_height_px = 120
     canvas_width_px = 800
     num_years = data.end_year - data.start_year + 1
     canvas_height_px = num_years * year_height_px
@@ -148,6 +173,13 @@ function drawLifemap(data, styles) {
         return x
     }
 
+    function getDateObj(datestring) {
+        if(datestring.toLowerCase() == "present") {
+            return new Date(Date.now())
+        }
+        return new Date(datestring)
+    }
+
     // --------------------------------------------------------
     // draw
 
@@ -157,8 +189,10 @@ function drawLifemap(data, styles) {
         year = data.start_year + i
 
         // background color
-        ctx.fillStyle = ['#ffffff','#eeeeee'][i%2] // zebra
-        ctx.fillRect(0, i*year_height_px, 800, year_height_px)
+        ctx.fillStyle = ['#fcfcfc','#eaeaea'][i%2] // zebra
+        ctx.fillRect(0, i*year_height_px,
+            canvas_width_px,
+            year_height_px)
 
         // timeline with tick marks
         drawTimeline(i)
@@ -204,7 +238,7 @@ function drawLifemap(data, styles) {
     for(k = 0; k < data.homes.length; k++) {
         home = data.homes[k]
         d0 = new Date(home.start_date)
-        d1 = new Date(home.end_date)
+        d1 = getDateObj(home.end_date)
         yr0 = d0.getFullYear()
         yr1 = d1.getFullYear()
         yrk = yr0
@@ -237,7 +271,7 @@ function drawLifemap(data, styles) {
     for(k = 0; k < data.jobs.length; k++) {
         job = data.jobs[k]
         d0 = new Date(job.start_date)
-        d1 = new Date(job.end_date)
+        d1 = getDateObj(job.end_date)
         yr0 = d0.getFullYear()
         yr1 = d1.getFullYear()
         yrk = yr0
@@ -253,7 +287,7 @@ function drawLifemap(data, styles) {
                 x1 = timeline_x1
             }
             y = (yrk-data.start_year+.5)*year_height_px
-            ctx.fillStyle = ['#fab', '#fab'][k%2]
+            ctx.fillStyle = ['#dd8', '#dd8'][k%2]
             ctx.fillRect(x0, y+11, x1-x0, 12)
 
             ctx.font = '14px sans-serif'
@@ -261,6 +295,71 @@ function drawLifemap(data, styles) {
             ctx.textAlign = 'center'
             ctx.fillStyle = '#333'
             ctx.fillText(job.text, (x0+x1)/2, y+7+11)
+
+            yrk++
+        }
+    }
+
+    // relationships
+    // first: loop through and calculate the offset of each
+    for(k = 0; k < data.relationships.length; k++) {
+        relk = data.relationships[k]
+
+        if(k == 0) {
+            relk._offset = 0
+            continue
+        }
+
+        d0 = new Date(relk.start_date).getTime()
+        d1 = getDateObj(relk.end_date).getTime()
+
+        offsets = []
+        for(r = 0; r < k; r++) {
+            relr = data.relationships[r]
+            r0 = new Date(relr.start_date).getTime()
+            r1 = getDateObj(relr.end_date).getTime()
+            if(    (r0 >= d0 && r0 < d1)
+                || (r1 > d0 && r1 <= d1)
+                || (r0 <= d0 && r1 >= d1) ) {
+                offsets.push(relr._offset)
+            }
+        }
+        offset = 0
+        while(offsets.includes(offset)) { offset++ }
+        data.relationships[k]._offset = offset
+    }
+
+    // then: draw relationships
+    for(k = 0; k < data.relationships.length; k++) {
+        rel = data.relationships[k]
+        d0 = new Date(rel.start_date)
+        d1 = getDateObj(rel.end_date)
+        yr0 = d0.getFullYear()
+        yr1 = d1.getFullYear()
+        yrk = yr0
+        while(yrk <= yr1) {
+            if(yrk == yr0) {
+                x0 = dateX(d0, year%4==0)
+            } else {
+                x0 = timeline_x0
+            }
+            if(yrk == yr1) {
+                x1 = dateX(d1, year%4==0)
+            } else {
+                x1 = timeline_x1
+            }
+            y = (yrk-data.start_year+.5)*year_height_px
+
+            yprime = rel._offset*8
+
+            ctx.fillStyle = ['#fab', '#fba'][k%2]
+            ctx.fillRect(x0, y-yprime-34, x1-x0, 5)
+
+            ctx.font = '14px sans-serif'
+            ctx.textBaseline = 'alphabetic'
+            ctx.textAlign = 'center'
+            ctx.fillStyle = '#333'
+            ctx.fillText(rel.text, (x0+x1)/2, y+7-yprime-34)
 
             yrk++
         }
