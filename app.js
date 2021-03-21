@@ -11,7 +11,7 @@ function clearCanvas() {
 // the data
 data = {
     start_year: 2015,
-    end_year: 2021,
+    end_year: "present",
     date_of_birth: "August 22, 1995",
     include_birthdays: true,
     ribbons: {
@@ -231,9 +231,15 @@ stylescode.addEventListener('input', function() {
 // the main draw function
 function drawLifemap(data, styles) {
 
+    // little bit of parsing
+    if(data.end_year.toLowerCase() == "present") {
+        now = new Date(Date.now())
+        data.end_year = now.getFullYear()
+    }
+    num_years = data.end_year - data.start_year + 1
+
     // --------------------------------------------------------
     // dimension specification
-    num_years = data.end_year - data.start_year + 1
     year_height_px = styles.canvas.year_height
     canvas_width_px = styles.canvas.width
     canvas_height_px = num_years * year_height_px
@@ -254,7 +260,6 @@ function drawLifemap(data, styles) {
         ctx.beginPath()
         ctx.moveTo(x, y-height/2)
         ctx.lineTo(x, y+height/2)
-        ctx.closePath()
         ctx.stroke()
     }
 
@@ -276,6 +281,8 @@ function drawLifemap(data, styles) {
         }
     }
 
+    // get the x-coordinate (on the canvas) of a particular date
+    // along the timeline
     function dateX(date) {
         if(date.getFullYear() % 4 == 0) {
             leapdays = 1;
@@ -372,7 +379,8 @@ function drawLifemap(data, styles) {
                 }
                 if(yrk == yr1) {
                     // the + 1 creates a pixel gap between adjacent ribbons
-                    x1 = dateX(d1) + 1
+                    x1 = dateX(d1)
+                    if(x1 < timeline_x1) x1--
                 } else {
                     x1 = timeline_x1
                 }
