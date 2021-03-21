@@ -22,8 +22,8 @@ data = {
                 text: "Paris"
             },
             {
-                start_date: "16 June, 2016",
-                end_date: "August 31, 2018",
+                start_date: "15 June, 2016",
+                end_date: "Sept 1, 2018",
                 text: "New Haven"
             },
             {
@@ -32,12 +32,12 @@ data = {
                 text: "Zanzibar"
             },
             {
-                start_date: "10 Jan 2020",
+                start_date: "9 Jan 2020",
                 end_date: "23 March 2020",
                 text: "Maui"
             },
             {
-                start_date: "24 March 2020",
+                start_date: "23 March 2020",
                 end_date: "present",
                 text: "Zanzibar"
             }
@@ -81,7 +81,7 @@ data = {
                 text: "Di"
             },
             {
-                start_date: "November 20, 2018",
+                start_date: "November 19, 2018",
                 end_date: "April 1, 2019",
                 text: "Ez"
             }
