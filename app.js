@@ -163,8 +163,8 @@ styles = {
             bg_color: ["#2a6f97","#468faf"], // fillStyles for bg
             font_color: "#fff",              // fillStyles for text
             ribbon_yoffset: 22,  // relative to vertical center of timeline
-            ribbon_width: 24,    // width (actually height) of ribbon
-            text_yoffset: 13     // relative to center of ribbon
+            ribbon_width: 28,    // width (actually height) of ribbon
+            text_yoffset: 15     // relative to center of ribbon
         },
         jobs: {
             canvas_styles: {
