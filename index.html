@@ -41,6 +41,11 @@
             background-color: #eee;
             border-radius: 6px;
         }
+        .subtitle {
+            font-size: .8em;
+            margin-left: 2em;
+            color: #777;
+        }
         #main {
             width: 100%;
             display: flex;
@@ -88,7 +93,7 @@
 </head>
 <body>
 
-    <h3>Lifemapper</h3>
+    <h3>Lifemapper<span class='subtitle'>don't forget to save your data! (scroll down)</span></h3>
     <hr style='margin-bottom:1em'>
 
     <div id='main'>
@@ -116,8 +121,6 @@
     <script type="coffee">
     # todo:
     # - add edit history + an undo button (accidental deletions are annoying)
-    # - add a "clear all" button to reset all data
-    # - add a "demo data" button to insert demo data
     # - make it so text size/visibility is adjusted appropriately in ribbons. (hmm.)
     # - make an interface to select styles
     # - add a download button
@@ -176,10 +179,14 @@
                 redraw()
             'sort entries'
 
+    # this is just a simple function. (foreshadowing)
+    eventSortFunction = (item) ->
+        getDateObj(item.date).getTime()
+
     dom.EVENTS_TAB_CONTENT = ->
         events = fetch('data').events
         DIV {},
-            dom.SORTLINK('events', ['date'])
+            dom.SORTLINK('events', eventSortFunction)
             BR()
             BR()
             for k in [0..events.length]
@@ -195,7 +202,8 @@
                             dom.DELETELINK('events', k)
                     BR()
 
-    ribbonSortFunctionArray = (item) ->
+    # note that this is a function that produces an array of functions. whatever
+    getRibbonSortFunctionsArray = (item) ->
         fstart = (item) -> getDateObj(item.start_date).getTime()
         fend = (item) -> getDateObj(item.end_date).getTime()
         return [fstart, fend]
@@ -203,7 +211,7 @@
     dom.A_RIBBONS_TAB_CONTENT = (category) ->
         items = fetch('data').ribbons[category]
         DIV {},
-            dom.SORTLINK(['ribbons', category], ribbonSortFunctionArray())
+            dom.SORTLINK(['ribbons', category], getRibbonSortFunctionsArray())
             BR()
             BR()
             for k in [0..items.length]
