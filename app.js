@@ -9,9 +9,22 @@ function clearCanvas() {
 
 // --------------------------------------------------------
 // the data
-default_data = {
-    start_year: 2015,
+empty_data = {
+    start_year: (new Date(Date.now())).getFullYear() - 3,
     end_year: "present",
+    date_of_birth: "",
+    include_birthdays: true,
+    ribbons: {
+        homes: [],
+        jobs: [],
+        relationships: []
+    },
+    events: []
+}
+
+demo_data = {
+    start_year: 2015,
+    end_year: 2021,
     date_of_birth: "August 22, 1995",
     include_birthdays: true,
     ribbons: {
@@ -459,4 +472,4 @@ function drawLifemap(_data, _styles) {
 }
 
 // let er rip
-drawLifemap(default_data, default_styles);
+drawLifemap(empty_data, default_styles);

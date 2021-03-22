@@ -116,6 +116,11 @@
     <script type="coffee">
     # to do:
     # - undo button (accidental deletions are annoying)
+    # - add a "clear all" button to reset all data
+    # - add a "demo data" button to insert demo data
+    # - sort button inside each tab, at top, for sorting entries
+    # - sort entries by date/start_date before drawing the lifemap
+    # - interface to select styles
 
     redraw = () ->
         data = fetch('data')
@@ -123,7 +128,7 @@
         clearCanvas()
         drawLifemap(data, styles)
 
-    state.data = _.cloneDeep(default_data)
+    state.data = _.cloneDeep(empty_data)
     state.styles = _.cloneDeep(default_styles)
 
     dom.EDITABLE_INPUT = (path, classname='') ->
@@ -226,19 +231,37 @@
 
     dom.THE_BIG_FORM = ->
         DIV {},
-            'start year: '
-            dom.EDITABLE_INPUT('start_year', 'input_short')
-            BR()
-            'end year: '
-            dom.EDITABLE_INPUT('end_year', 'input_short')
-            BR()
-            'date of birth: '
-            dom.EDITABLE_INPUT('date_of_birth')
-            BR()
-            'include birthdays? '
-            dom.EDITABLE_CHECKBOX('include_birthdays')
+            DIV {},
+                data = fetch('data')
+                A
+                    onClick: (e) =>
+                        state.data = demo_data
+                        save(data)
+                        redraw()
+                    'try demo data'
+                ' . . . '
+                A
+                    onClick: (e) =>
+                        state.data = empty_data
+                        save(data)
+                        redraw()
+                    'clear all data'
+                BR()
+                BR()
 
-            dom.FORM_TABS()
+            DIV {},
+                'start year: '
+                dom.EDITABLE_INPUT('start_year', 'input_short')
+                BR()
+                'end year: '
+                dom.EDITABLE_INPUT('end_year', 'input_short')
+                BR()
+                'date of birth: '
+                dom.EDITABLE_INPUT('date_of_birth')
+                BR()
+                'include birthdays? '
+                dom.EDITABLE_CHECKBOX('include_birthdays')
+                dom.FORM_TABS()
 
     dom.CODEBOX = (stateobj) ->
         TEXTAREA
