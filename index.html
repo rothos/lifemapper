@@ -4,7 +4,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Open%20Sans&display=swap" rel="stylesheet">
     <style type="text/css">
-        /*canvas { border: 1px solid #ddd; }*/
+        canvas {
+            padding: 8px;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            box-shadow: 0px 1px 2px #ddd;
+        }
         html {
             font-family: "Open Sans", sans-serif;
             font-size: .9em;
@@ -43,19 +48,65 @@
     </canvas>
 
     <hr>
+    <input_form></input_form>
+
+    <hr>
     <h3>Your lifemap code</h3>
     <p>Copy this code and save it somewhere (e.g. email it to yourself or save it on your computer) &mdash; it contains all the information necessary to recreate your lifemap. Paste it back in this box in the future in order to modify, add to, or regenerate your lifemap.</p>
-    <textarea id="datacode"></textarea>
+    <data_codebox></data_codebox>
 
     <hr>
     <h3>Custom styling</h3>
     <p>The styling of your lifemap is also editable. If you change this from the default, save it as well.</p>
-    <textarea id="stylescode"></textarea>
+    <styles_codebox></styles_codebox>
 
     <hr>
-    <p class='footer'>Lifemapper is a fully client-side application. Your lifemap data is never transmitted anywhere. If you are concerned about privacy, you could load the page, disconnect your internet, and only then input your data. Or, you could download a local copy of the web site (by cloning the github respository) and run it all locally.</p>
+    <p class='footer'>Lifemapper is a fully client-side application. Your lifemap data is never transmitted anywhere. If you are concerned about data privacy, you could disconnect your internet before inputting your data. Or, you could download a local copy of the web site (by cloning the <a href='https://github.com/rothos/lifemapper'>git repository</a>) and run it all locally.</p>
 
     <script src="lodash.js"></script>
     <script src="app.js"></script>
+    <script type="coffee">
+    state.data = _.cloneDeep(default_data)
+    state.styles = _.cloneDeep(default_styles)
+
+    dom.INPUT_FORM = ->
+        data = fetch('data')
+        styles = fetch('styles')
+
+        console.log(data)
+
+        DIV {},
+            'start year '
+            INPUT
+                value: data.start_year.toString()
+                onChange: (e) =>
+                    data.start_year = e.target.value
+                    save(data)
+                    clearCanvas()
+                    drawLifemap(data, styles)
+
+    dom.CODEBOX = (stateobj) ->
+        data = fetch('data')
+        styles = fetch('styles')
+
+        TEXTAREA
+            value: JSON.stringify(stateobj, null, 4)
+            onChange: (e) =>
+                console.log(stateobj)
+                stateobj = JSON.parse(e.target.value)
+                save(stateobj)
+                clearCanvas()
+                drawLifemap(data, styles)
+
+    dom.DATA_CODEBOX = ->
+        data = fetch('data')
+        dom.CODEBOX(data)
+
+    dom.STYLES_CODEBOX = ->
+        styles = fetch('styles')
+        dom.CODEBOX(styles)
+
+    </script>
+    <script src="https://stateb.us/client6.js"></script>
 </body>
 </html>

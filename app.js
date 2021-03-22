@@ -9,7 +9,7 @@ function clearCanvas() {
 
 // --------------------------------------------------------
 // the data
-data = {
+default_data = {
     start_year: 2015,
     end_year: "present",
     date_of_birth: "August 22, 1995",
@@ -114,7 +114,7 @@ data = {
 // --------------------------------------------------------
 // the styles
 // sizes are in px
-styles = {
+default_styles = {
     canvas: {
         width: 800,
         year_height: 150,
@@ -196,47 +196,26 @@ styles = {
     }
 }
 
-
-// --------------------------------------------------------
-// setting up the code box and its events
-
-// put the data in the code box
-datacode = document.getElementById('datacode')
-datacode.value = JSON.stringify(data, null, 4)
-
-// put the styles in the code box
-stylescode = document.getElementById('stylescode')
-stylescode.value = JSON.stringify(styles, null, 4)
-
-// add an event listener to redraw the lifemap each time
-// the code is changed
-datacode.addEventListener('input', function() {
-    clearCanvas()
-    data = JSON.parse(datacode.value)
-    styles = JSON.parse(stylescode.value)
-    drawLifemap(data, styles)
-})
-
-// add an event listener to redraw the lifemap each time
-// the code is changed
-stylescode.addEventListener('input', function() {
-    clearCanvas()
-    data = JSON.parse(datacode.value)
-    styles = JSON.parse(stylescode.value)
-    drawLifemap(data, styles)
-})
-
-
 // --------------------------------------------------------
 // the main draw function
-function drawLifemap(data, styles) {
+function drawLifemap(_data, _styles) {
+    data = _.cloneDeep(_data)
+    styles = _.cloneDeep(_styles)
 
     // little bit of parsing
-    if(data.end_year.toLowerCase() == "present") {
+    if(data.end_year.toString().toLowerCase() == "present") {
         now = new Date(Date.now())
         data.end_year = now.getFullYear()
     }
+    data.end_year = parseInt(data.end_year)
+    data.start_year = parseInt(data.start_year)
     num_years = data.end_year - data.start_year + 1
+
+    // prevent the browser from rendering crazy images
+    // when someone hasn't finished typing
+    if(Math.abs(num_years) > 200 || num_years <= 0) {
+        return
+    }
 
     // --------------------------------------------------------
     // dimension specification
@@ -378,9 +357,9 @@ function drawLifemap(data, styles) {
                     x0 = timeline_x0
                 }
                 if(yrk == yr1) {
-                    // the + 1 creates a pixel gap between adjacent ribbons
+                    // the x1-- creates a pixel gap between adjacent ribbons
                     x1 = dateX(d1)
-                    if(x1 < timeline_x1) x1--
+                    if(x1 < timeline_x1) { x1-- }
                 } else {
                     x1 = timeline_x1
                 }
@@ -476,4 +455,4 @@ function drawLifemap(data, styles) {
 }
 
 // let er rip
-drawLifemap(data, styles);
+drawLifemap(default_data, default_styles);
