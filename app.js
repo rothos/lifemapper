@@ -10,6 +10,7 @@ function clearCanvas() {
 // --------------------------------------------------------
 // the data
 empty_data = {
+    version: "1.0",
     start_year: (new Date(Date.now())).getFullYear() - 3,
     end_year: "present",
     date_of_birth: "",
@@ -23,6 +24,7 @@ empty_data = {
 }
 
 demo_data = {
+    version: "1.0",
     start_year: 2015,
     end_year: 2021,
     date_of_birth: "August 22, 1995",
@@ -128,6 +130,7 @@ demo_data = {
 // the styles
 // sizes are in px
 default_styles = {
+    version: "1.0",
     canvas: {
         width: 750,
         year_height: 150,
@@ -207,6 +210,15 @@ default_styles = {
             stack_offset: -8     // stack vertical shift in px
         }
     }
+}
+
+// --------------------------------------------------------
+// helper functions
+function getDateObj(datestring) {
+    if(datestring && datestring.toLowerCase() == "present") {
+        return new Date(Date.now())
+    }
+    return new Date(datestring)
 }
 
 // --------------------------------------------------------
@@ -290,13 +302,6 @@ function drawLifemap(_data, _styles) {
         dayofyear = monthdays.slice(0,date.getMonth()).reduce(add,0) + date.getDate()
         x = timeline_x0 + dayofyear/365*timeline_width_px
         return Math.floor(x)
-    }
-
-    function getDateObj(datestring) {
-        if(datestring && datestring.toLowerCase() == "present") {
-            return new Date(Date.now())
-        }
-        return new Date(datestring)
     }
 
     function getFillStyle(color_or_colors, k) {

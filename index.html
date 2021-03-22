@@ -114,13 +114,17 @@
     <script src="lodash.js"></script>
     <script src="app.js"></script>
     <script type="coffee">
-    # to do:
-    # - undo button (accidental deletions are annoying)
+    # todo:
+    # - add edit history + an undo button (accidental deletions are annoying)
     # - add a "clear all" button to reset all data
     # - add a "demo data" button to insert demo data
-    # - sort button inside each tab, at top, for sorting entries
+    # - make it so text size/visibility is adjusted appropriately in ribbons. (hmm.)
+    # - make an interface to select styles
+    # - add a download button
+    # - add at least a little documentation/notes for the avg user
+    #
+    # wontfix:
     # - sort entries by date/start_date before drawing the lifemap
-    # - interface to select styles
 
     redraw = () ->
         data = fetch('data')
@@ -162,9 +166,22 @@
                 redraw()
             text
 
+    dom.SORTLINK = (path, sortby, classname='') ->
+        data = fetch('data')
+        A
+            className: classname
+            onClick: (e) =>
+                _.set(data, path, _.sortBy(_.get(data, path), sortby))
+                save(data)
+                redraw()
+            'sort entries'
+
     dom.EVENTS_TAB_CONTENT = ->
         events = fetch('data').events
         DIV {},
+            dom.SORTLINK('events', ['date'])
+            BR()
+            BR()
             for k in [0..events.length]
                 classname = if events[k] then '' else 'dimmed'
                 DIV { className: classname },
@@ -178,9 +195,17 @@
                             dom.DELETELINK('events', k)
                     BR()
 
+    ribbonSortFunctionArray = (item) ->
+        fstart = (item) -> getDateObj(item.start_date).getTime()
+        fend = (item) -> getDateObj(item.end_date).getTime()
+        return [fstart, fend]
+
     dom.A_RIBBONS_TAB_CONTENT = (category) ->
         items = fetch('data').ribbons[category]
         DIV {},
+            dom.SORTLINK(['ribbons', category], ribbonSortFunctionArray())
+            BR()
+            BR()
             for k in [0..items.length]
                 classname = if items[k] then '' else 'dimmed'
                 DIV { className: classname },
@@ -272,12 +297,10 @@
                 redraw()
 
     dom.DATA_CODEBOX = ->
-        data = fetch('data')
-        dom.CODEBOX(data)
+        dom.CODEBOX(fetch('data'))
 
     dom.STYLES_CODEBOX = ->
-        styles = fetch('styles')
-        dom.CODEBOX(styles)
+        dom.CODEBOX(fetch('styles'))
 
     </script>
     <script src="https://stateb.us/client6.js"></script>
