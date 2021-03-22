@@ -96,11 +96,11 @@ default_data = {
             }
         },
         {
-            date: "February 15, 2016",
+            date: "15 feb 2016",
             text: "bought a car"
         },
         {
-            date: "November 25, 2020",
+            date: "nov 25, 2020",
             text: "got covid",
             styles: {
                 canvas_styles: {
