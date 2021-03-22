@@ -123,7 +123,8 @@ demo_data = {
                 }
             }
         }
-    ]
+    ],
+    key: "data"
 }
 
 // --------------------------------------------------------
@@ -209,7 +210,8 @@ default_styles = {
             stack_ribbons: true, // stack overlapping ribbons?
             stack_offset: -8     // stack vertical shift in px
         }
-    }
+    },
+    key: "styles"
 }
 
 zebra = _.cloneDeep(default_styles)
