@@ -397,8 +397,12 @@ function drawLifemap(_data, _styles) {
                 ctx.fillStyle = getFillStyle(s.bg_color, k)
                 ctx.fillRect(x0, y+s.ribbon_yoffset, x1-x0, s.ribbon_width)
 
-                ctx.fillStyle = getFillStyle(s.font_color, k)
-                ctx.fillText(item.text, (x0+x1)/2, y+s.ribbon_yoffset+s.text_yoffset)
+                // only draw the text if it fits inside the ribbon
+                // todo: make an styles option for this?
+                if(ctx.measureText(item.text).width < x1-x0) {
+                    ctx.fillStyle = getFillStyle(s.font_color, k)
+                    ctx.fillText(item.text, (x0+x1)/2, y+s.ribbon_yoffset+s.text_yoffset)
+                }
 
                 yrk++
             }
