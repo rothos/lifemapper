@@ -399,9 +399,23 @@ function drawLifemap(_data, _styles) {
 
                 // only draw the text if it fits inside the ribbon
                 // todo: make an styles option for this?
-                if(ctx.measureText(item.text).width < x1-x0) {
-                    ctx.fillStyle = getFillStyle(s.font_color, k)
+                ctx.fillStyle = getFillStyle(s.font_color, k)
+                if(ctx.measureText(item.text).width < x1-x0-1) {
                     ctx.fillText(item.text, (x0+x1)/2, y+s.ribbon_yoffset+s.text_yoffset)
+                } else if(!item_canvas_styles.font) {
+                    // if the text doesn't fit in the ribbon rectangle
+                    // AND if there is no specific font style for the item,
+                    // then let's try resizing it to have it fit.
+                    // todo: make a styles option for this?
+                    fontsize = parseInt(s.canvas_styles.font)
+                    while(ctx.measureText(item.text).width >= x1-x0-1
+                        && fontsize >= 9) {
+                        fontsize--
+                        ctx.font = fontsize.toString() + 'px sans-serif'
+                    }
+                    if(fontsize >= 9) {
+                        ctx.fillText(item.text, (x0+x1)/2, y+s.ribbon_yoffset+s.text_yoffset)
+                    }
                 }
 
                 yrk++
