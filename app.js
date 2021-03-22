@@ -212,6 +212,14 @@ default_styles = {
     }
 }
 
+zebra = _.cloneDeep(default_styles)
+zebra.canvas.bg_color = ['#fff','#eee']
+
+all_styles = {
+    default: default_styles,
+    zebra: zebra
+}
+
 // --------------------------------------------------------
 // helper functions
 function getDateObj(datestring) {

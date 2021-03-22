@@ -271,11 +271,31 @@
             DIV { className: 'tabs-content' },
                 tab_fns[ui.active_tab]()
 
-    dom.RADIOBUTTONS = () ->
-        ''
+    dom.RADIOBUTTONS = (callbacks, labels) ->
+        name = getRandomString()
+        for k in [0...callbacks.length]
+            uniq = getRandomString()
+            SPAN {},
+                INPUT
+                    type: 'radio'
+                    id: uniq
+                    name: name
+                    onClick: callbacks[k]
+                LABEL { htmlFor: uniq }, labels[k] or 'x'
+
+    getStyleSelectFn = (name) ->
+        () ->
+            styles = fetch('styles')
+            state.styles = all_styles[name]
+            save(styles)
+            redraw()
 
     dom.STYLES_FORM = ->
-        'styles'
+        callbacks = [getStyleSelectFn('default'), getStyleSelectFn('zebra')]
+        labels = ['default', 'zebra']
+        DIV {},
+            DIV 'styles: '
+            dom.RADIOBUTTONS(callbacks, labels)
 
     dom.THE_BIG_FORM = ->
         checkboxId = getRandomString()
