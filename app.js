@@ -135,7 +135,7 @@ default_styles = {
         width: 750,
         year_height: 150,
         gutter_left: 75,
-        gutter_right: 0,
+        gutter_right: 10,
         bg_color: "#fff" // give an array if you want to zebra the bg
     },
     year_numbers: {
