@@ -399,8 +399,6 @@ function drawLifemap(_data, _styles) {
                 y = Math.floor((yrk-data.start_year+.5)*year_height_px)
 
                 // set the styles
-                item_canvas_styles = {}
-                try { item_canvas_styles = item.styles.canvas_styles } catch {}
                 s = _.merge(_.cloneDeep(styles), item.styles)
                 _.merge(ctx, s.canvas_styles)
 
@@ -412,7 +410,7 @@ function drawLifemap(_data, _styles) {
                 ctx.fillStyle = getFillStyle(s.font_color, k)
                 if(ctx.measureText(item.text).width < x1-x0-1) {
                     ctx.fillText(item.text, (x0+x1)/2, y+s.ribbon_yoffset+s.text_yoffset)
-                } else if(!item_canvas_styles.font) {
+                } else if(!_.get(item, ['styles', 'canvas_styles', 'font'])) {
                     // if the text doesn't fit in the ribbon rectangle
                     // AND if there is no specific font style for the item,
                     // then let's try resizing it to have it fit.
@@ -441,8 +439,6 @@ function drawLifemap(_data, _styles) {
             yearN = date.getFullYear() - data.start_year
 
             // set the styles
-            event_canvas_styles = {}
-            try { event_canvas_styles = event.styles.canvas_styles } catch {}
             s = _.merge(_.cloneDeep(styles), event.styles)
             _.merge(ctx, s.canvas_styles)
 

@@ -127,11 +127,23 @@
     # todo:
     # - add edit history + an undo button (accidental deletions are annoying)
     # - optional local storage
-    # - make an interface to select styles
     # - add at least a little documentation/notes for the avg user
+    #   - not well documented, but very customizable. if ur hack inclined
+    #   - can use 'relationships' for 'projects', etc -- anything overlapping
+    #   - dates are v flexible, e.g. "2 jan 2001" or "jan 2 2001" or "2001-02-01"
     #
     # wontfix:
     # - sort entries by date/start_date before drawing the lifemap
+
+    saveState = (str) ->
+        ss = ['data','styles','ui']
+
+        if str == 'clear'
+            for s in ss
+                localStorage.removeItem(s)
+        else
+            for s in ss
+                localStorage.setItem(s, fetch(s))
 
     redraw = () ->
         data = fetch('data')
