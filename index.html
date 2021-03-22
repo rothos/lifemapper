@@ -128,7 +128,6 @@
     # - add edit history + an undo button (accidental deletions are annoying)
     # - optional local storage
     # - make an interface to select styles
-    # - add a download button
     # - add at least a little documentation/notes for the avg user
     #
     # wontfix:
@@ -140,28 +139,38 @@
         clearCanvas()
         drawLifemap(data, styles)
 
+    getRandomString = () -> Math.random().toString(16).substr(2, 8)
+
     state.data = _.cloneDeep(empty_data)
     state.styles = _.cloneDeep(default_styles)
 
-    dom.EDITABLE_INPUT = (path, classname='') ->
+    dom.EDITABLE_INPUT = (path, label='', classname='') ->
         data = fetch('data')
-        INPUT
-            className: classname
-            value: _.get(data, path, "")
-            onChange: (e) =>
-                _.set(data, path, e.target.value)
-                save(data)
-                redraw()
+        str = getRandomString()
+        SPAN {},
+            LABEL { htmlFor: str }, label
+            INPUT
+                className: classname
+                id: str
+                value: _.get(data, path, "")
+                onChange: (e) =>
+                    _.set(data, path, e.target.value)
+                    save(data)
+                    redraw()
 
-    dom.EDITABLE_CHECKBOX = (path, classname='') ->
+    dom.EDITABLE_CHECKBOX = (path, label='', classname='') ->
         data = fetch('data')
-        INPUT
-            type: "checkbox"
-            checked: _.get(data, path, true)
-            onChange: (e) =>
-                _.set(data, path, !_.get(data, path, true))
-                save(data)
-                redraw()
+        str = getRandomString()
+        SPAN {},
+            LABEL { htmlFor: str }, label
+            INPUT
+                type: "checkbox"
+                checked: _.get(data, path, true)
+                id: str
+                onChange: (e) =>
+                    _.set(data, path, !_.get(data, path, true))
+                    save(data)
+                    redraw()
 
     # we're always deleting a specific element from an array
     dom.DELETELINK = (path_to_array, index, text='delete', classname='') ->
@@ -197,11 +206,9 @@
             for k in [0..events.length]
                 classname = if events[k] then '' else 'dimmed'
                 DIV { className: classname },
-                    'text: '
-                    dom.EDITABLE_INPUT(['events', k, 'text'])
+                    dom.EDITABLE_INPUT(['events', k, 'text'], 'text: ')
                     BR()
-                    'date: '
-                    dom.EDITABLE_INPUT(['events', k, 'date'])
+                    dom.EDITABLE_INPUT(['events', k, 'date'], 'date: ')
                     if events[k]
                         DIV {},
                             dom.DELETELINK('events', k)
@@ -222,14 +229,11 @@
             for k in [0..items.length]
                 classname = if items[k] then '' else 'dimmed'
                 DIV { className: classname },
-                    'text: '
-                    dom.EDITABLE_INPUT(['ribbons', category, k, 'text'])
+                    dom.EDITABLE_INPUT(['ribbons', category, k, 'text'], 'text: ')
                     BR()
-                    'start date: '
-                    dom.EDITABLE_INPUT(['ribbons', category, k, 'start_date'])
+                    dom.EDITABLE_INPUT(['ribbons', category, k, 'start_date'], 'start date: ')
                     BR()
-                    'end date: '
-                    dom.EDITABLE_INPUT(['ribbons', category, k, 'end_date'])
+                    dom.EDITABLE_INPUT(['ribbons', category, k, 'end_date'], 'end date: ')
                     if items[k]
                         DIV {},
                             dom.DELETELINK(['ribbons', category], k)
@@ -267,8 +271,18 @@
             DIV { className: 'tabs-content' },
                 tab_fns[ui.active_tab]()
 
+    dom.RADIOBUTTONS = () ->
+        ''
+
+    dom.STYLES_FORM = ->
+        'styles'
+
     dom.THE_BIG_FORM = ->
+        checkboxId = getRandomString()
         DIV {},
+            DIV {},
+                dom.STYLES_FORM()
+                HR()
             DIV {},
                 data = fetch('data')
                 A
@@ -288,17 +302,13 @@
                 BR()
 
             DIV {},
-                'start year: '
-                dom.EDITABLE_INPUT('start_year', 'input_short')
+                dom.EDITABLE_INPUT('start_year', 'start year: ', 'input_short')
                 BR()
-                'end year: '
-                dom.EDITABLE_INPUT('end_year', 'input_short')
+                dom.EDITABLE_INPUT('end_year', 'end year: ', 'input_short')
                 BR()
-                'date of birth: '
-                dom.EDITABLE_INPUT('date_of_birth')
+                dom.EDITABLE_INPUT('date_of_birth', 'date of birth: ')
                 BR()
-                'include birthdays? '
-                dom.EDITABLE_CHECKBOX('include_birthdays')
+                dom.EDITABLE_CHECKBOX('include_birthdays', 'include birthdays? ')
                 dom.FORM_TABS()
 
     download = =>
