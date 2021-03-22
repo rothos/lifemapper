@@ -15,10 +15,8 @@
             font-size: .9em;
         }
         body {
+            width: 100%;
             padding: 1em 2em;
-        }
-        canvas {
-            margin: 1em 0;
         }
         h3 {
             margin-bottom: 0;
@@ -27,6 +25,11 @@
             margin-top: .9em;
             width: 800px;
         }
+        a {
+            color: blue;
+            cursor: pointer;
+            text-decoration: underline;
+        }
         textarea {
             width: 800px;
             height: 300px;
@@ -34,6 +37,19 @@
             background-color: #eee;
             border-radius: 6px;
         }
+        #main {
+            display: flex;
+            flex-direction: row;
+        }
+            #canvas {
+                margin: 1em;
+            }
+            #input_form {
+                min-width: 250px;
+            }
+                .input_short {
+                    width: 70px;
+                }
         .footer {
             font-size: .8em;
         }
@@ -43,16 +59,16 @@
 
     <h3>Lifemapper</h3>
 
-    <canvas id="canvas" width="800" height="100">
-        <p>Looks like your browser doesn't support the features necessary to run this web app :'(</p>
-    </canvas>
-
-    <hr>
-    <input_form></input_form>
+    <div id='main'>
+        <canvas id="canvas" width="750" height="100">
+            <p>Looks like your browser doesn't support the features necessary to run this web app :'(</p>
+        </canvas>
+        <input_form></input_form>
+    </div>
 
     <hr>
     <h3>Your lifemap code</h3>
-    <p>Copy this code and save it somewhere (e.g. email it to yourself or save it on your computer) &mdash; it contains all the information necessary to recreate your lifemap. Paste it back in this box in the future in order to modify, add to, or regenerate your lifemap.</p>
+    <p>Copy this code and save it somewhere (e.g. email it to yourself or save it on your computer) &mdash; it contains all the information necessary to recreate your lifemap. Paste it back in this box in the future in order to modify, add to, or re-generate your lifemap.</p>
     <data_codebox></data_codebox>
 
     <hr>
@@ -66,37 +82,91 @@
     <script src="lodash.js"></script>
     <script src="app.js"></script>
     <script type="coffee">
+    redraw = () ->
+        data = fetch('data')
+        styles = fetch('styles')
+        clearCanvas()
+        drawLifemap(data, styles)
+
     state.data = _.cloneDeep(default_data)
     state.styles = _.cloneDeep(default_styles)
 
-    dom.INPUT_FORM = ->
+    dom.EDIT_INPUT = (path, classname='') ->
         data = fetch('data')
-        styles = fetch('styles')
+        INPUT
+            className: classname
+            value: _.get(data, path, "")
+            onChange: (e) =>
+                _.set(data, path, e.target.value)
+                save(data)
+                redraw()
 
-        console.log(data)
+    dom.EDIT_CHECKBOX = (path, classname='') ->
+        data = fetch('data')
+        INPUT
+            type: "checkbox"
+            checked: _.get(data, path, true)
+            onChange: (e) =>
+                _.set(data, path, !_.get(data, path, true))
+                save(data)
+                redraw()
 
+    # we're always deleting a specific element from an array
+    dom.EDIT_DELETELINK = (path_to_array, index, text='delete', classname='') ->
+        data = fetch('data')
+        A
+            className: classname
+            onClick: (e) =>
+                _.get(data, path_to_array).splice(index, 1)
+                save(data)
+                redraw()
+            text
+
+    dom.EDIT_EVENTS = ->
+        events = fetch('data').events
         DIV {},
-            'start year '
-            INPUT
-                value: data.start_year.toString()
-                onChange: (e) =>
-                    data.start_year = e.target.value
-                    save(data)
-                    clearCanvas()
-                    drawLifemap(data, styles)
+            'events:'
+            BR()
+            BR()
+            for k in [0..events.length]
+                event = events[k]
+                DIV {},
+                    'text: '
+                    dom.EDIT_INPUT(['events', k, 'text'])
+                    BR()
+                    'date: '
+                    dom.EDIT_INPUT(['events', k, 'date'])
+                    if events[k]
+                        DIV {},
+                            dom.EDIT_DELETELINK('events', k)
+                    BR()
+
+    dom.EDIT_TABS = ->
+        dom.EDIT_EVENTS()
+
+    dom.INPUT_FORM = ->
+        DIV { id: 'input_form' },
+            'start year: '
+            dom.EDIT_INPUT('start_year', 'input_short')
+            BR()
+            'end year: '
+            dom.EDIT_INPUT('end_year', 'input_short')
+            BR()
+            'date of birth: '
+            dom.EDIT_INPUT('date_of_birth')
+            BR()
+            'include birthdays? '
+            dom.EDIT_CHECKBOX('include_birthdays')
+            HR()
+            dom.EDIT_TABS()
 
     dom.CODEBOX = (stateobj) ->
-        data = fetch('data')
-        styles = fetch('styles')
-
         TEXTAREA
             value: JSON.stringify(stateobj, null, 4)
             onChange: (e) =>
-                console.log(stateobj)
                 stateobj = JSON.parse(e.target.value)
                 save(stateobj)
-                clearCanvas()
-                drawLifemap(data, styles)
+                redraw()
 
     dom.DATA_CODEBOX = ->
         data = fetch('data')

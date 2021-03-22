@@ -116,10 +116,10 @@ default_data = {
 // sizes are in px
 default_styles = {
     canvas: {
-        width: 800,
+        width: 750,
         year_height: 150,
         gutter_left: 75,
-        gutter_right: 60,
+        gutter_right: 0,
         bg_color: "#fff" // give an array if you want to zebra the bg
     },
     year_numbers: {
@@ -207,6 +207,10 @@ function drawLifemap(_data, _styles) {
         now = new Date(Date.now())
         data.end_year = now.getFullYear()
     }
+    if(data.start_year.toString().toLowerCase() == "present") {
+        now = new Date(Date.now())
+        data.start_year = now.getFullYear()
+    }
     data.end_year = parseInt(data.end_year)
     data.start_year = parseInt(data.start_year)
     num_years = data.end_year - data.start_year + 1
@@ -276,7 +280,7 @@ function drawLifemap(_data, _styles) {
     }
 
     function getDateObj(datestring) {
-        if(datestring.toLowerCase() == "present") {
+        if(datestring && datestring.toLowerCase() == "present") {
             return new Date(Date.now())
         }
         return new Date(datestring)
@@ -303,13 +307,13 @@ function drawLifemap(_data, _styles) {
                     continue
                 }
 
-                d0 = new Date(item.start_date).getTime()
+                d0 = getDateObj(item.start_date).getTime()
                 d1 = getDateObj(item.end_date).getTime()
 
                 offsets = []
                 for(var i = 0; i < k; i++) {
                     it = items[i]
-                    i0 = new Date(it.start_date).getTime()
+                    i0 = getDateObj(it.start_date).getTime()
                     i1 = getDateObj(it.end_date).getTime()
                     if(    (i0 >= d0 && i0 < d1)
                         || (i1 > d0 && i1 <= d1)
@@ -345,7 +349,7 @@ function drawLifemap(_data, _styles) {
         // now draw each ribbon
         for(var k = 0; k < items.length; k++) {
             item = items[k]
-            d0 = new Date(item.start_date)
+            d0 = getDateObj(item.start_date)
             d1 = getDateObj(item.end_date)
             yr0 = d0.getFullYear()
             yr1 = d1.getFullYear()
@@ -386,7 +390,7 @@ function drawLifemap(_data, _styles) {
     function drawEvents(eventslist, styles) {
         for(var k = 0; k < eventslist.length; k++) {
             event = eventslist[k]
-            date = new Date(event.date)
+            date = getDateObj(event.date)
             x = dateX(date)
             yearN = date.getFullYear() - data.start_year
 
@@ -396,7 +400,7 @@ function drawLifemap(_data, _styles) {
             s = _.merge(_.cloneDeep(styles), event.styles)
             _.merge(ctx, s.canvas_styles)
 
-            ctx.fillText(event.text,
+            ctx.fillText(event.text || "",
                 x+s.text_xoffset,
                 (yearN+.5)*year_height_px+s.text_yoffset)
             ctx.beginPath()
