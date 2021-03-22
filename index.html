@@ -13,6 +13,10 @@
         html {
             font-family: "Open Sans", sans-serif;
             font-size: .9em;
+            box-sizing: border-box;
+        }
+        *, *:before, *:after {
+          box-sizing: inherit;
         }
         body {
             width: 100%;
@@ -38,15 +42,42 @@
             border-radius: 6px;
         }
         #main {
+            width: 100%;
             display: flex;
             flex-direction: row;
+            flex-wrap: nowrap;
         }
             #canvas {
                 margin: 0 1.5em 1.5em 0;
+                flex-grow: 0;
             }
-            #input_form {
-                min-width: 250px;
+            the_big_form {
+                min-width: 260px;
+                flex-grow: 1;
+                overflow: scroll;
             }
+                .tabs-wrap {
+                    margin-top: 1em;
+                }
+                    .tabs {
+                        border-bottom: 1px solid #999;
+                    }
+                        .tab {
+                            font-size: .9em;
+                            margin: 0 .15em -1px;
+                            border: 1px solid #999;
+                            padding: .4em;
+                            display: inline-block;
+                        }
+                            .tab.active {
+                                border-bottom: 1px solid white;
+                            }
+                    .tabs-content {
+                        padding-top: 1em;
+                    }
+                        .dimmed {
+                            opacity: .6;
+                        }
                 .input_short {
                     width: 70px;
                 }
@@ -64,7 +95,7 @@
         <canvas id="canvas" width="750" height="100">
             <p>Looks like your browser doesn't support the features necessary to run this web app :'(</p>
         </canvas>
-        <input_form></input_form>
+        <the_big_form></the_big_form>
     </div>
 
     <hr>
@@ -83,6 +114,9 @@
     <script src="lodash.js"></script>
     <script src="app.js"></script>
     <script type="coffee">
+    # to do:
+    # - undo button (accidental deletions are annoying)
+
     redraw = () ->
         data = fetch('data')
         styles = fetch('styles')
@@ -92,7 +126,7 @@
     state.data = _.cloneDeep(default_data)
     state.styles = _.cloneDeep(default_styles)
 
-    dom.EDIT_INPUT = (path, classname='') ->
+    dom.EDITABLE_INPUT = (path, classname='') ->
         data = fetch('data')
         INPUT
             className: classname
@@ -102,7 +136,7 @@
                 save(data)
                 redraw()
 
-    dom.EDIT_CHECKBOX = (path, classname='') ->
+    dom.EDITABLE_CHECKBOX = (path, classname='') ->
         data = fetch('data')
         INPUT
             type: "checkbox"
@@ -113,7 +147,7 @@
                 redraw()
 
     # we're always deleting a specific element from an array
-    dom.EDIT_DELETELINK = (path_to_array, index, text='delete', classname='') ->
+    dom.DELETELINK = (path_to_array, index, text='delete', classname='') ->
         data = fetch('data')
         A
             className: classname
@@ -123,43 +157,88 @@
                 redraw()
             text
 
-    dom.EDIT_EVENTS = ->
+    dom.EVENTS_TAB_CONTENT = ->
         events = fetch('data').events
         DIV {},
-            'events:'
-            BR()
-            BR()
             for k in [0..events.length]
-                event = events[k]
-                DIV {},
+                classname = if events[k] then '' else 'dimmed'
+                DIV { className: classname },
                     'text: '
-                    dom.EDIT_INPUT(['events', k, 'text'])
+                    dom.EDITABLE_INPUT(['events', k, 'text'])
                     BR()
                     'date: '
-                    dom.EDIT_INPUT(['events', k, 'date'])
+                    dom.EDITABLE_INPUT(['events', k, 'date'])
                     if events[k]
                         DIV {},
-                            dom.EDIT_DELETELINK('events', k)
+                            dom.DELETELINK('events', k)
                     BR()
 
-    dom.EDIT_TABS = ->
-        dom.EDIT_EVENTS()
+    dom.A_RIBBONS_TAB_CONTENT = (category) ->
+        items = fetch('data').ribbons[category]
+        DIV {},
+            for k in [0..items.length]
+                classname = if items[k] then '' else 'dimmed'
+                DIV { className: classname },
+                    'text: '
+                    dom.EDITABLE_INPUT(['ribbons', category, k, 'text'])
+                    BR()
+                    'start date: '
+                    dom.EDITABLE_INPUT(['ribbons', category, k, 'start_date'])
+                    BR()
+                    'end date: '
+                    dom.EDITABLE_INPUT(['ribbons', category, k, 'end_date'])
+                    if items[k]
+                        DIV {},
+                            dom.DELETELINK(['ribbons', category], k)
+                    BR()
 
-    dom.INPUT_FORM = ->
-        DIV { id: 'input_form' },
+    dom.FORM_TABS = ->
+        data = fetch('data')
+        ribbon_categories = _.keys(data.ribbons)
+
+        tab_names = _.concat(['events'], ribbon_categories)
+        tab_fns = _.concat(
+            [dom.EVENTS_TAB_CONTENT],
+            _.map(ribbon_categories, (cat) -> (() -> dom.A_RIBBONS_TAB_CONTENT(cat)) )
+        )
+
+        ui = fetch('ui')
+
+        if not ui.active_tab
+            ui.active_tab = 0
+            save(ui)
+
+        DIV { className: 'tabs-wrap' },
+            DIV { className: 'tabs' },
+                for k in [0..tab_names.length-1]
+                    name = tab_names[k]
+                    active = if ui.active_tab is k then ' active' else ''
+
+                    A
+                        className: 'tab' + active
+                        onClick: ((k) ->
+                            ui.active_tab = k
+                            save(ui)).bind(this, k)
+                        name
+
+            DIV { className: 'tabs-content' },
+                tab_fns[ui.active_tab]()
+
+    dom.THE_BIG_FORM = ->
+        DIV {},
             'start year: '
-            dom.EDIT_INPUT('start_year', 'input_short')
+            dom.EDITABLE_INPUT('start_year', 'input_short')
             BR()
             'end year: '
-            dom.EDIT_INPUT('end_year', 'input_short')
+            dom.EDITABLE_INPUT('end_year', 'input_short')
             BR()
             'date of birth: '
-            dom.EDIT_INPUT('date_of_birth')
+            dom.EDITABLE_INPUT('date_of_birth')
             BR()
             'include birthdays? '
-            dom.EDIT_CHECKBOX('include_birthdays')
-            HR()
-            dom.EDIT_TABS()
+            dom.EDITABLE_CHECKBOX('include_birthdays')
+
+            dom.FORM_TABS()
 
     dom.CODEBOX = (stateobj) ->
         TEXTAREA
