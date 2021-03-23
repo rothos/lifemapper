@@ -142,7 +142,7 @@
     localData = localDataStorage(app_namespace)
 
     localStorageDo = (str) ->
-        ss = ['data', 'styles', 'ui']
+        ss = ['data', 'styles', 'ui', 'history']
 
         if str == 'save'
             stuff = {}
@@ -151,8 +151,8 @@
         else if str == 'load'
             for s in ss
                 obj = fetch(s)
-                obj = _.cloneDeep(localData.get(s))
-                save(obj)
+                state[s] = _.cloneDeep(localData.get(s))
+                #save(obj)
         else if str == 'clear'
             for s in ss
                 localData.remove(s)
@@ -170,6 +170,32 @@
             else
                 localStorageDo('clear')
 
+    historyPush = (data) ->
+        history = fetch('history')
+        console.log(history.data_states)
+        history.data_states = _.slice(history.data_states, 0, history.index+1)
+        #history.data_states.push(_.cloneDeep(data))            # ?????
+        history.data_states.push({start_year: data.start_year}) # ?????
+        console.log(history.data_states)
+        history.index = history.data_states.length - 1
+        save(history)
+
+    historyBack = () ->
+        history = fetch('history')
+        if history.index > 0
+            history.index--
+            save(history)
+            data = fetch('data'); data = _.cloneDeep(history.data_states[history.index]); save(data); redraw()
+            console.log('back: start_year=' + data.start_year)
+
+    historyFwd = () ->
+        history = fetch('history')
+        if history.index < history.data_states.length - 1
+            history.index++
+            save(history)
+            data = fetch('data'); data = _.cloneDeep(history.data_states[history.index]); save(data); redraw()
+            console.log('fwd: start_year=' + data.start_year)
+
     redraw = () ->
         localStorageCheckpoint()
         data = fetch('data')
@@ -181,6 +207,7 @@
 
     state.data = _.cloneDeep(empty_data)
     state.styles = _.cloneDeep(default_styles)
+    state.history = {data_states: [_.cloneDeep(empty_data)], index: 0} # history only tracks changes to state.data
 
     dom.EDITABLE_INPUT = (path, label='', classname='') ->
         data = fetch('data')
@@ -194,6 +221,7 @@
                 onChange: (e) =>
                     _.set(data, path, e.target.value)
                     save(data)
+                    historyPush(data)
                     redraw()
 
     dom.EDITABLE_CHECKBOX = (stateprop, path, label='', defaultval=false, classname='') ->
@@ -371,6 +399,15 @@
                         save(data)
                         redraw()
                     'clear all data'
+                BR()
+                BR()
+                A
+                    onClick: historyBack
+                    'undo'
+                SPAN(' . . ')
+                A
+                    onClick: historyFwd
+                    'redo'
                 BR()
                 BR()
 
