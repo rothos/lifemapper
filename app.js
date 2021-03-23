@@ -20,7 +20,8 @@ empty_data = {
         jobs: [],
         relationships: []
     },
-    events: []
+    events: [],
+    key: "data"
 }
 
 demo_data = {

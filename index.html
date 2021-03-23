@@ -171,30 +171,31 @@
                 localStorageDo('clear')
 
     historyPush = (data) ->
+        maxhistorystates = 200
         history = fetch('history')
-        console.log(history.data_states)
-        history.data_states = _.slice(history.data_states, 0, history.index+1)
-        #history.data_states.push(_.cloneDeep(data))            # ?????
-        history.data_states.push({start_year: data.start_year}) # ?????
-        console.log(history.data_states)
-        history.index = history.data_states.length - 1
-        save(history)
+
+        if not history.data_states
+            history.data_states = [data]
+            history.index = 0
+            return
+
+        if not _.isEqual(data, history.data_states[history.index])
+            history.data_states = _.slice(history.data_states, 0, history.index+1)
+            history.data_states = _.reverse(_.slice(_.reverse(history.data_states), 0, maxhistorystates))
+            history.data_states.push(_.cloneDeep(data))
+            history.index = history.data_states.length - 1
 
     historyBack = () ->
         history = fetch('history')
         if history.index > 0
             history.index--
-            save(history)
-            data = fetch('data'); data = _.cloneDeep(history.data_states[history.index]); save(data); redraw()
-            console.log('back: start_year=' + data.start_year)
+            save(_.clone(history.data_states[history.index])); redraw()
 
     historyFwd = () ->
         history = fetch('history')
         if history.index < history.data_states.length - 1
             history.index++
-            save(history)
-            data = fetch('data'); data = _.cloneDeep(history.data_states[history.index]); save(data); redraw()
-            console.log('fwd: start_year=' + data.start_year)
+            save(_.clone(history.data_states[history.index])); redraw()
 
     redraw = () ->
         localStorageCheckpoint()
@@ -205,9 +206,13 @@
 
     getRandomString = () -> Math.random().toString(16).substr(2, 8)
 
-    state.data = _.cloneDeep(empty_data)
-    state.styles = _.cloneDeep(default_styles)
-    state.history = {data_states: [_.cloneDeep(empty_data)], index: 0} # history only tracks changes to state.data
+    save(_.cloneDeep(empty_data))
+    save(_.cloneDeep(default_styles))
+    historyPush(_.cloneDeep(fetch('data')))
+
+    # WHY does this fuck up? after the state mutates,
+    # the first entry in the array mutates with it..
+    #save({data_states: [_.cloneDeep(empty_data)], index: 0, key: "history"})
 
     dom.EDITABLE_INPUT = (path, label='', classname='') ->
         data = fetch('data')
@@ -235,6 +240,7 @@
                 onChange: (e) =>
                     _.set(obj, path, !_.get(obj, path, defaultval))
                     save(obj)
+                    historyPush(fetch('data'))
                     redraw()
             LABEL { htmlFor: str }, label
 
@@ -246,6 +252,7 @@
             onClick: (e) =>
                 _.get(data, path_to_array).splice(index, 1)
                 save(data)
+                historyPush(data)
                 redraw()
             text
 
@@ -256,6 +263,7 @@
             onClick: (e) =>
                 _.set(data, path, _.sortBy(_.get(data, path), sortby))
                 save(data)
+                historyPush(data)
                 redraw()
             'sort entries'
 
@@ -385,18 +393,17 @@
                 dom.STYLES_FORM()
                 HR()
             DIV {},
-                data = fetch('data')
                 A
                     onClick: (e) =>
-                        state.data = demo_data
-                        save(data)
+                        save(demo_data)
+                        historyPush(demo_data)
                         redraw()
                     'try demo data'
                 ' . . . '
                 A
                     onClick: (e) =>
-                        state.data = empty_data
-                        save(data)
+                        save(empty_data)
+                        historyPush(empty_data)
                         redraw()
                     'clear all data'
                 BR()
@@ -440,6 +447,8 @@
                 changeFn()
                 stateobj = JSON.parse(e.target.value)
                 save(stateobj)
+                if stateobj.key == "data"
+                    historyPush(data)
                 redraw()
 
     dom.DATA_CODEBOX = ->
