@@ -450,11 +450,14 @@
             value: JSON.stringify(stateobj, null, 4)
             onChange: (e) =>
                 changeFn()
-                stateobj = JSON.parse(e.target.value)
-                save(stateobj)
-                if stateobj.key == "data"
-                    historyPush(data)
-                redraw()
+                try
+                    stateobj = JSON.parse(e.target.value)
+                    save(stateobj)
+                    if stateobj.key == "data"
+                        historyPush(stateobj)
+                    redraw()
+                catch
+                    console.log('warning: failed to parse JSON code, did not redraw lifemap')
 
     dom.DATA_CODEBOX = ->
         dom.CODEBOX(fetch('data'))
