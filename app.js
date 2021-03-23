@@ -499,6 +499,3 @@ function drawLifemap(_data, _styles) {
     }
 
 }
-
-// let er rip
-drawLifemap(empty_data, default_styles);

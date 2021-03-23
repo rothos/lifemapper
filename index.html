@@ -123,6 +123,7 @@
     <p class='footer'>Lifemapper is a fully client-side application. Your lifemap data is never transmitted anywhere. If you are concerned about data privacy, you could disconnect your internet before inputting your data. Or, you could download a local copy of the web site (by cloning the <a href='https://github.com/rothos/lifemapper'>git repository</a>) and run it all locally.</p>
 
     <script src="lodash.js"></script>
+    <script src="localDataStorage-1.3.0.trim.js"></script>
     <script src="app.js"></script>
     <script type="coffee">
     # todo:
@@ -136,17 +137,41 @@
     # wontfix:
     # - sort entries by date/start_date before drawing the lifemap
 
-    saveState = (str) ->
-        ss = ['data','styles','ui']
+    init = true
+    app_namespace = 'lifemapper_app_s8e2Dj1'
+    localData = localDataStorage(app_namespace)
 
-        if str == 'clear'
+    localStorageDo = (str) ->
+        ss = ['data', 'styles', 'ui']
+
+        if str == 'save'
+            stuff = {}
             for s in ss
-                localStorage.removeItem(s)
+                localData.set(s, _.cloneDeep(fetch(s)))
+        else if str == 'load'
+            for s in ss
+                obj = fetch(s)
+                obj = _.cloneDeep(localData.get(s))
+                save(obj)
+        else if str == 'clear'
+            for s in ss
+                localData.remove(s)
+
+    localStorageCheckpoint = () ->
+        ui = fetch('ui')
+        if init
+            init = false
+            if _.get(localData.get('ui'), ['localStorage'])
+                console.log('loading...')
+                localStorageDo('load')
         else
-            for s in ss
-                localStorage.setItem(s, fetch(s))
+            if ui.localStorage
+                localStorageDo('save')
+            else
+                localStorageDo('clear')
 
     redraw = () ->
+        localStorageCheckpoint()
         data = fetch('data')
         styles = fetch('styles')
         clearCanvas()
@@ -171,19 +196,19 @@
                     save(data)
                     redraw()
 
-    dom.EDITABLE_CHECKBOX = (path, label='', classname='') ->
-        data = fetch('data')
+    dom.EDITABLE_CHECKBOX = (stateprop, path, label='', defaultval=false, classname='') ->
+        obj = fetch(stateprop)
         str = getRandomString()
         SPAN {},
-            LABEL { htmlFor: str }, label
             INPUT
                 type: "checkbox"
-                checked: _.get(data, path, true)
+                checked: _.get(obj, path, defaultval)
                 id: str
                 onChange: (e) =>
-                    _.set(data, path, !_.get(data, path, true))
-                    save(data)
+                    _.set(obj, path, !_.get(obj, path, defaultval))
+                    save(obj)
                     redraw()
+            LABEL { htmlFor: str }, label
 
     # we're always deleting a specific element from an array
     dom.DELETELINK = (path_to_array, index, text='delete', classname='') ->
@@ -326,6 +351,9 @@
         checkboxId = getRandomString()
         DIV {},
             DIV {},
+                dom.EDITABLE_CHECKBOX('ui', 'localStorage', ' save my data on this computer so i can come back to it later')
+                HR()
+            DIV {},
                 dom.STYLES_FORM()
                 HR()
             DIV {},
@@ -353,7 +381,7 @@
                 BR()
                 dom.EDITABLE_INPUT('date_of_birth', 'date of birth: ')
                 BR()
-                dom.EDITABLE_CHECKBOX('include_birthdays', 'include birthdays? ')
+                dom.EDITABLE_CHECKBOX('data', 'include_birthdays', 'include birthdays? ', true)
                 dom.FORM_TABS()
 
     download = =>
@@ -385,6 +413,8 @@
             setStyle('custom')
         dom.CODEBOX(fetch('styles'), changeFn)
 
+    # let er rip
+    redraw()
     </script>
     <script src="https://stateb.us/client6.js"></script>
 </body>
