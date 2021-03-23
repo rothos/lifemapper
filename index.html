@@ -150,9 +150,13 @@
                 localData.set(s, _.cloneDeep(fetch(s)))
         else if str == 'load'
             for s in ss
-                obj = fetch(s)
-                state[s] = _.cloneDeep(localData.get(s))
-                #save(obj)
+                if s != 'history'
+                    save(_.cloneDeep(localData.get(s)))
+                else
+                    history = fetch('history')
+                    lshist = localData.get(s)
+                    history.data_states = _.cloneDeep(lshist.data_states)
+                    history.index = lshist.index
         else if str == 'clear'
             for s in ss
                 localData.remove(s)
