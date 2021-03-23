@@ -391,7 +391,8 @@
         checkboxId = getRandomString()
         DIV {},
             DIV {},
-                dom.EDITABLE_CHECKBOX('ui', 'localStorage', ' save my data on this computer so i can come back to it later')
+                dom.EDITABLE_CHECKBOX('ui', 'localStorage',
+                    ' save my data on this computer so i can come back to it later')
                 HR()
             DIV {},
                 dom.STYLES_FORM()
@@ -402,23 +403,23 @@
                         save(demo_data)
                         historyPush(demo_data)
                         redraw()
-                    'try demo data'
+                    '[try demo data]'
                 ' . . . '
                 A
                     onClick: (e) =>
                         save(empty_data)
                         historyPush(empty_data)
                         redraw()
-                    'clear all data'
-                BR()
-                BR()
+                    '[clear all data]'
+                HR()
+            DIV { style: { textAlign: "right" } },
                 A
                     onClick: historyBack
-                    'undo'
-                SPAN(' . . ')
+                    '[undo]'
+                SPAN(' . . . ')
                 A
                     onClick: historyFwd
-                    'redo'
+                    '[redo]'
                 BR()
                 BR()
 
